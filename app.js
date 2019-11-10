@@ -6,10 +6,11 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const path = require('path');
 const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
-/* const wrongRouter = require('./routes/wrong'); */
-const { login, createUser } = require('./controllers/user');
+const loginRouter = require('./routes/login');
+const createUserRouter = require('./routes/create-user');
 const NotFoundError = require('./errors/not-found-error');
 
 
@@ -35,15 +36,21 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.use(requestLogger);
+
+app.use('/signin', loginRouter);
+app.use('/signup', createUserRouter);
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
 
 app.use('/*', () => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
+
+app.use(errorLogger);
+
 app.use(errors());
+
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
