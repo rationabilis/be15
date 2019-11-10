@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -37,6 +38,12 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(requestLogger);
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 app.use('/signin', loginRouter);
 app.use('/signup', createUserRouter);
