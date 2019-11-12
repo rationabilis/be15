@@ -13,7 +13,7 @@ const auth = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : '');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev_key');
   } catch (err) {
     throw new UnauthorizedError('Неправильные почта или пароль');
   }

@@ -5,19 +5,10 @@ const {
   getAllCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/card');
 
-cardsRouter.get('/',
-  celebrate({
-    headers: Joi.object({
-      'content-type': Joi.string().required(),
-    }).unknown(),
-  }),
-  auth, getAllCards);
+cardsRouter.get('/', auth, getAllCards);
 
 cardsRouter.post('/',
   celebrate({
-    headers: Joi.object({
-      'content-type': Joi.string().required(),
-    }).unknown(),
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
       link: Joi.string().required().uri(),
@@ -27,9 +18,6 @@ cardsRouter.post('/',
 
 cardsRouter.delete('/:cardId',
   celebrate({
-    headers: Joi.object({
-      'content-type': Joi.string().required(),
-    }).unknown(),
     params: Joi.object().keys({
       cardId: Joi.string().alphanum().length(24).required(),
     }),
@@ -38,9 +26,6 @@ cardsRouter.delete('/:cardId',
 
 cardsRouter.put('/:cardId/likes',
   celebrate({
-    headers: Joi.object({
-      'content-type': Joi.string().required(),
-    }).unknown(),
     params: Joi.object().keys({
       cardId: Joi.string().alphanum().length(24).required(),
     }),
@@ -49,9 +34,6 @@ cardsRouter.put('/:cardId/likes',
 
 cardsRouter.delete('/:cardId/likes',
   celebrate({
-    headers: Joi.object({
-      'content-type': Joi.string().required(),
-    }).unknown(),
     params: Joi.object().keys({
       cardId: Joi.string().alphanum().length(24).required(),
     }),
