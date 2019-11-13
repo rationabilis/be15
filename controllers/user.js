@@ -33,8 +33,10 @@ const createUser = (req, res, next) => {
       email: req.body.email,
       password: hash,
     }))
-    .then((user) => res.send(user))
-    .then(() => { throw new BadRequestError('Неверные данные пользователя'); })
+    .then((user) => {
+      if (!user) { throw new BadRequestError('Неверные данные пользователя'); }
+      return res.send(user);
+    })
     .catch(next);
 };
 
