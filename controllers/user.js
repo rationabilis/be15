@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-error');
-const UnauthorizedError = require('../errors/unauthorized-error');
 const BadRequestError = require('../errors/bad-request-error');
 
 /* логин */
@@ -17,7 +16,7 @@ const getAllUsers = (req, res, next) => {
 
 /* Возвращает пользователя по _id */
 const getUser = (req, res, next) => {
-  User.findById(req.params.id)
+  User.findById(req.params.id, { select: '-password' })
     .then((user) => {
       if (!user) { throw new NotFoundError('Нет пользователя с таким id'); } else res.send({ data: user });
     })
@@ -34,8 +33,10 @@ const createUser = (req, res, next) => {
       email: req.body.email,
       password: hash,
     }))
-    .then((user) => res.send(user))
-    .then(() => { throw new BadRequestError('Неверные данные пользователя'); })
+    .then((user) => {
+      if (!user) { throw new BadRequestError('Неверные данные пользователя'); }
+      return res.send(user);
+    })
     .catch(next);
 };
 
@@ -44,7 +45,7 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : '', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
       res
         .cookie('jwt', token, {
           maxAge: 3600000 * 24 * 7,
@@ -52,9 +53,6 @@ const login = (req, res, next) => {
           sameSite: true,
         })
         .end();
-    })
-    .then(() => {
-      throw new UnauthorizedError('Неправильные почта или пароль');
     })
     .catch(next);
 };
